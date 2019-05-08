@@ -1,0 +1,78 @@
+'----------------------------------
+'-- INTERRUPT SUPPROCEDURE       --
+'-- AYHAN OZDEMIR 1990 DENIZLI   --
+'----------------------------------
+ISIM$=CHR$(40)+CHR$(99)+CHR$(41)+CHR$(32)+CHR$(65)+CHR$(89)+CHR$(72)+CHR$(65)+CHR$(78)+CHR$(32)+CHR$(153)+CHR$(90)+CHR$(68)+CHR$(69)+CHR$(77)+CHR$(105)+CHR$(82)
+
+DEF FNEKRAN$(EKRAN$)
+    LOCATE 1,1,0 : PRINT CHR$(65) : DEF SEG=&HB000
+    IF PEEK(0)=65 THEN EKRAN=&HB000 ELSE EKRAN=&HB800
+    DEF SEG=EKRAN : BLOAD EKRAN$,0
+    END DEF
+
+DEF FNINPUT$(S1,S2,S3,S4$,S5)
+    S4$=S4$+STRING$(80," ") : S4$=LEFT$(S4$,S3) : COLOR 0,7 : S=1 : INS=1
+    BAS:
+    LOCATE S1,S2,0 : PRINT S4$
+    KB$="" : WHILE KB$="" : LOCATE S1,S+S2-1,1 :  KB$=INKEY$ : WEND
+    IF LEN(KB$)=1  THEN
+        KB=ASC(KB$)
+        IF KB=27 THEN TUS=27 : GOTO CIKFN
+        IF KB=8 THEN IF S>1 THEN S4$=MID$(S4$,1,S-2)+MID$(S4$,S)+" " :S=S-1 :GOTO BAS ELSE SOUND 100,1 :GOTO BAS
+        IF KB=13 THEN TUS=13 : GOTO CIKFN
+        IF S>S3 THEN SOUND 100,1 : GOTO BAS
+        IF S5=0 THEN IF KB<32 THEN GOTO BAS
+        IF S5=1 THEN IF INSTR("0123456789",KB$)=0 THEN GOTO BAS
+        S4$=MID$(S4$,1,S-1)+KB$+MID$(S4$,S+INS) : S4$=MID$(S4$,1,S3)
+        S=S+1
+        ELSE
+        KB=ASC(RIGHT$(KB$,1))
+        SELECT CASE KB
+               CASE 75 : IF S>01 THEN S=S-1  ELSE SOUND 100,1
+               CASE 77 : IF S<S3 THEN S=S+1  ELSE SOUND 100,1
+               CASE 72 : TUS=72  : GOTO CIKFN
+	       CASE 80 : TUS=80  : GOTO CIKFN
+               CASE 73 : TUS=73  : GOTO CIKFN
+               CASE 81 : TUS=81  : GOTO CIKFN
+	       CASE 82 : IF INS=0 THEN INS=1 ELSE INS=0
+ 	       CASE 83 : S4$=MID$(S4$,1,S-1)+MID$(S4$,S+1)+" "
+	       CASE 71 : IF S5=0 THEN S=1
+	       CASE 79 : IF S5=0 THEN S=S3
+	       END SELECT
+               IF KB>58 AND KB<69   THEN TUS=KB : GOTO CIKFN
+	       IF KB>103 AND KB<114 THEN TUS=KB : GOTO CIKFN
+        END IF
+        GOTO BAS
+  CIKFN:
+       FNINPUT$=S4$ : LOCATE S1,S2,0 : COLOR 7,0 : PRINT S4$
+  END DEF
+
+DEF FNMESAJ$(M1$,M2$)
+ B1:
+    LOCATE 24,1 : PRINT M1$; : SOUND 1500,1
+    KB$="" : WHILE KB$="" : KB$=INKEY$ : WEND
+    KB$=UCASE$(KB$) : IF INSTR(1,M2$,KB$)=0 THEN GOTO B1
+    FNMESAJ$=KB$
+    LOCATE 24,1 : PRINT STRING$(78," ");
+   END DEF
+
+DEF FNRENK$(MM$)
+    IF MM$="REVERSE" THEN COLOR 0,7
+    IF MM$="NORM" THEN COLOR 7,0  : COLOR 10,0
+    IF MM$="BLKBLK" THEN COLOR 16,0
+    IF MM$="WHTBLK" THEN COLOR 16,7
+    FNRENK$=""
+    END DEF
+
+DEF FNSIFIR$(M$,M)
+    M$=STR$(VAL(M$)) : M$=STRING$(20,"0")+RIGHT$(M$,LEN(M$)-1)
+    FNSIFIR$=RIGHT$(M$,M)
+    END DEF
+DEF FNRTRIM$(MM$)
+    FOR I%=LEN(MM$) TO 1 STEP -1
+        IF MID$(MM$,I%,1)<>" " THEN MM$=MID$(MM$,1,I%) : GOTO CC
+        NEXT
+CC:
+    FNRTRIM$=MM$
+    END DEF
+
